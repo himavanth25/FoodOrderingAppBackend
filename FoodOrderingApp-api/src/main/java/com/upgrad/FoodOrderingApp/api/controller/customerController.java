@@ -80,7 +80,7 @@ public class customerController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, path = "/customer", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<UpdateCustomerResponse> userProfile(@RequestHeader("authorization") final String authToken, final UpdateCustomerRequest updateCustomerRequest) throws AuthorizationFailedException, AuthenticationFailedException, UpdateCustomerException {
+    public ResponseEntity<UpdateCustomerResponse> updateUserProfile(@RequestHeader("authorization") final String authToken, final UpdateCustomerRequest updateCustomerRequest) throws AuthorizationFailedException, AuthenticationFailedException, UpdateCustomerException {
 
     CustomerEntity customerEntity=customerService.updateCustomer(parseAuthToken(authToken),updateCustomerRequest.getFirstName(),updateCustomerRequest.getLastName());
     UpdateCustomerResponse userDetailsResponse=new UpdateCustomerResponse().firstName(customerEntity.getFirstName()).lastName(customerEntity.getLastName())
@@ -88,6 +88,17 @@ public class customerController {
 
 
         return new ResponseEntity<UpdateCustomerResponse>(userDetailsResponse, HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, path = "/customer/password", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<UpdatePasswordResponse> updatePassword(@RequestHeader("authorization") final String authToken, final UpdatePasswordRequest updatePasswordRequest) throws AuthorizationFailedException, AuthenticationFailedException, UpdateCustomerException {
+
+        CustomerEntity customerEntity=customerService.updatePassword(parseAuthToken(authToken),updatePasswordRequest.getOldPassword(),updatePasswordRequest.getNewPassword());
+        UpdatePasswordResponse userDetailsResponse=new UpdatePasswordResponse()
+                                     .id(customerEntity.getUuid()).status("CUSTOMER PASSWORD UPDATED SUCCESSFULLY");
+
+
+        return new ResponseEntity<UpdatePasswordResponse>(userDetailsResponse, HttpStatus.OK);
     }
 
     private String parseAuthToken(final String authorization){

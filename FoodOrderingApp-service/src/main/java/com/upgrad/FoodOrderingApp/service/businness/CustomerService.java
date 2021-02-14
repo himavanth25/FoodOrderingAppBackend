@@ -46,7 +46,7 @@ public class CustomerService {
             throw new SignUpRestrictedException("SGR-002", "Invalid email-id format!");
         }
 
-        if (!customerEntity.getPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\\\S+$).{8,20}$")) {
+        if (!customerEntity.getPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[#@$%&*!^])(?=\\\\S+$).{8,20}$")) {
             throw new SignUpRestrictedException("SGR-004", "Weak password!");
         }
 
@@ -132,6 +132,35 @@ public class CustomerService {
         CustomerEntity customer=authTokenEntity.getUser();
         customer.setFirstName(firstName);
         customer.setLastName(lastName);
+        customerDao.updateCustomerDetails(customer);
+        return customer;
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public CustomerEntity updatePassword(final String authorization,String oldPassword,String newPassword) throws UpdateCustomerException, AuthenticationFailedException {
+        CustomerAuthTokenEntity authTokenEntity= customerDao.getUserAuthTokenByAccessToken(authorization);
+        if(authTokenEntity == null ) {
+            throw new AuthenticationFailedException("ATHR-001", "Customer is not Logged in.");
+        }
+
+        if((authTokenEntity != null && authTokenEntity.getLogoutAt() != null)) {
+            throw new AuthenticationFailedException("ATHR-002", "Customer is logged out. Log in again to access this endpoint.");
+        }
+        Duration duration=Duration.between(ZonedDateTime.now(),authTokenEntity.getExpiresAt());
+        if((authTokenEntity != null && duration.isNegative())) {
+            throw new AuthenticationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint.");
+        }
+
+        CustomerEntity customer=authTokenEntity.getUser();
+
+        if(!customer.getPassword().equals(oldPassword)){
+            throw new UpdateCustomerException("UCR-004", "Incorrect old password!");
+        }
+        if (!customer.getPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[#@$%&*!^]).{8,20}")) {
+            throw new UpdateCustomerException("UCR-001", "Weak password!");
+        }
+        customer.setPassword(newPassword);
         customerDao.updateCustomerDetails(customer);
         return customer;
     }
