@@ -22,10 +22,10 @@ public class RestaurantDao {
         return entityManager.createNamedQuery("restaurants", RestaurantEntity.class).getResultList();
     }
 
-    public List<RestaurantEntity> getAllRestaurantsByName(String searchResName){
-        TypedQuery<RestaurantEntity> restaurants = entityManager.createNamedQuery("restaurantByName", RestaurantEntity.class);
+    public List<RestaurantEntity> getAllRestaurantsByName(String searchResName) {
+        TypedQuery<RestaurantEntity> restaurants = entityManager.createNamedQuery("restaurantByName",
+                RestaurantEntity.class);
         restaurants.setParameter("searchResName", "%" + searchResName + "%");
         return restaurants.getResultList();
     }
-
 }

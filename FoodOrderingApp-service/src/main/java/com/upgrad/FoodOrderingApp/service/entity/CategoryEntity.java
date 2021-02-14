@@ -6,6 +6,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "CATEGORY")
+@NamedQueries({
+        @NamedQuery(name = "categoryByUuid", query = "select q from CategoryEntity q where q.uuid = :uuid")
+})
 public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,5 +48,13 @@ public class CategoryEntity {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public List<RestaurantEntity> getRestaurants() {
+        return restaurants;
+    }
+
+    public void setRestaurants(List<RestaurantEntity> restaurants) {
+        this.restaurants = restaurants;
     }
 }

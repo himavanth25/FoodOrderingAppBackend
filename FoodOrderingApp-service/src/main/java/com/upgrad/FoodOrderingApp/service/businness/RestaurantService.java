@@ -1,12 +1,16 @@
 package com.upgrad.FoodOrderingApp.service.businness;
 
+import com.upgrad.FoodOrderingApp.service.common.GenericErrorCode;
 import com.upgrad.FoodOrderingApp.service.common.UnexpectedException;
+import com.upgrad.FoodOrderingApp.service.dao.CategoryDao;
 import com.upgrad.FoodOrderingApp.service.dao.RestaurantDao;
+import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.NoResultException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +18,11 @@ import java.util.List;
 public class RestaurantService {
 
     @Autowired
-    RestaurantDao restaurantDao;
+    private RestaurantDao restaurantDao;
+
+    @Autowired
+    private CategoryDao categoryDao;
+
 
     /**
      * @return - List of All Restaurants
@@ -40,5 +48,14 @@ public class RestaurantService {
             restaurants = new ArrayList<>();
         }
         return restaurants;
+    }
+
+    public List<RestaurantEntity> getAllRestaurantsByCategoryId(String categoryUUID) {
+        CategoryEntity categoryEntities = categoryDao.getCategoryByUuid(categoryUUID);
+        List<RestaurantEntity> restaurantEntities = new ArrayList<>();
+        if(categoryEntities.getRestaurants() != null){
+            restaurantEntities = categoryEntities.getRestaurants();
+        }
+        return restaurantEntities;
     }
 }

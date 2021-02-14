@@ -6,6 +6,7 @@ import com.upgrad.FoodOrderingApp.service.common.UnexpectedException;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
+import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.query.Procedure;
@@ -54,9 +55,15 @@ public class RestaurantController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "restaurant/name/{restaurantName}")
-    @Procedure(MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<RestaurantListResponse> getRestaurantsByName(@RequestBody(required = false) @PathVariable("restaurantName") final String restaurantName) throws RestaurantNotFoundException {
+    /**
+     * search restaurant by name and return list of matching results
+     *
+     * @param restaurantName
+     * @return
+     * @throws RestaurantNotFoundException
+     */
+    @RequestMapping(method = RequestMethod.GET, path = "restaurant/name/{restaurant_name}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<RestaurantListResponse> getRestaurantsByName(@RequestBody(required = false) @PathVariable("restaurant_name") final String restaurantName) throws RestaurantNotFoundException {
         if (restaurantName == null || restaurantName.isEmpty()) {
             throw new RestaurantNotFoundException("RNF-003", "Restaurant name field should not be empty");
         }
@@ -72,8 +79,28 @@ public class RestaurantController {
             restaurantLists.add(restaurant);
         }
         restaurantListResponse.setRestaurants(restaurantLists);
-
         return new ResponseEntity(restaurantListResponse, HttpStatus.OK);
+    }
+
+    // Get Restaurants by Category Id “/restaurant/category/{category_id}”
+    @RequestMapping(method = RequestMethod.GET, path = "/restaurant/category/{category_id}",
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<RestaurantListResponse> getRestaurantByCategory(
+            @RequestBody @PathVariable("category_id") final String categoryUUID)
+            throws CategoryNotFoundException {
+        if (categoryUUID == null || categoryUUID.isEmpty()) {
+            throw new CategoryNotFoundException("CNF-001", "Category id field should not be empty");
+        }
+        RestaurantListResponse restaurantListResponse = new RestaurantListResponse();
+        List<RestaurantList> restaurantLists = new ArrayList<>();
+
+        List<RestaurantEntity> allRestaurants = restaurantService.getAllRestaurantsByCategoryId(categoryUUID);
+        for (RestaurantEntity restaurantEntity : allRestaurants) {
+            RestaurantList restaurant = getRestaurantResponse(restaurantEntity);
+            restaurantLists.add(restaurant);
+        }
+        restaurantListResponse.setRestaurants(restaurantLists);
+        return new ResponseEntity<>(restaurantListResponse, HttpStatus.OK);
     }
 
     /**
@@ -84,6 +111,7 @@ public class RestaurantController {
      */
     private RestaurantList getRestaurantResponse(RestaurantEntity restaurantEntity) {
         RestaurantList restaurant = new RestaurantList();
+        restaurant.setId(UUID.fromString(restaurantEntity.getUuid()));
         restaurant.setAddress(getRestaurantAddressResp(restaurantEntity));
         restaurant.setAveragePrice(restaurantEntity.getAverage_price_for_two());
         String categoryString = getRestaurantCategoryString(restaurantEntity.getRestaurantCategories());

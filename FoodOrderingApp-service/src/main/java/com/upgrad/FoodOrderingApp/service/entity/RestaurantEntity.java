@@ -51,7 +51,7 @@ public class RestaurantEntity implements Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private AddressEntity address_id;
 
-    @ManyToMany
+    @ManyToMany()
     @JoinTable(name = "RESTAURANT_CATEGORY",
             joinColumns = @JoinColumn(name = "RESTAURANT_ID"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
