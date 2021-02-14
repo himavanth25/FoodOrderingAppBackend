@@ -1,18 +1,24 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
+import com.upgrad.FoodOrderingApp.api.model.LoginResponse;
 import com.upgrad.FoodOrderingApp.api.model.SignupCustomerRequest;
 import com.upgrad.FoodOrderingApp.api.model.SignupCustomerResponse;
 import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
+import com.upgrad.FoodOrderingApp.service.entity.CustomerAuthTokenEntity;
 import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
+import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Base64;
 import java.util.UUID;
 
 @RestController
@@ -33,5 +39,31 @@ public class customerController {
         final CustomerEntity createdCustomer=customerService.signup(customerEntity);
         SignupCustomerResponse response=new SignupCustomerResponse().id(createdCustomer.getUuid()).status("CUSTOMER SUCCESSFULLY REGISTERED");
         return new ResponseEntity<SignupCustomerResponse>(response, HttpStatus.CREATED);
+    }
+
+    @RequestMapping(method= RequestMethod.POST, path="/customer/login", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<LoginResponse> signin(@RequestHeader("authorization") final String authorization) throws AuthenticationFailedException {
+
+        //The authorization header will be in the format "Basic base64encoded username:password"
+        //First split the header and separate Basic to retrieve the base64encoded username:password
+        //Decode the base64encoded string and split it based on : to retrieve username and password
+        byte[] decode = Base64.getDecoder().decode(authorization.split("Basic ")[1]);
+        String decodedText = new String(decode);
+        String[] decodedArray = decodedText.split(":");
+
+        CustomerAuthTokenEntity userAuthToken = customerService.signin(decodedArray[0],decodedArray[1]);
+        CustomerEntity user = userAuthToken.getUser();
+
+        //Signin response will be the response body for a successful signin request
+        LoginResponse loginResponse = new LoginResponse().id(user.getUuid()).message("LOGGED IN SUCCESSFULLY")
+                                        .firstName(user.getFirstName())
+                                        .lastName(user.getLastName())
+                                        .contactNumber(user.getContactNumber())
+                                        .emailAddress(user.getEmail());
+
+        //JWT access token is added to the successful sigin response header
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("access_token",userAuthToken.getAccessToken());
+        return new ResponseEntity<LoginResponse>(loginResponse,headers,HttpStatus.OK);
     }
 }
