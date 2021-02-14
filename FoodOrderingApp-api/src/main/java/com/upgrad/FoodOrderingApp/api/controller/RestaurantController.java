@@ -1,10 +1,8 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
-import com.upgrad.FoodOrderingApp.api.model.CategoryList;
-import com.upgrad.FoodOrderingApp.api.model.RestaurantDetailsResponse;
-import com.upgrad.FoodOrderingApp.api.model.RestaurantDetailsResponseAddress;
-import com.upgrad.FoodOrderingApp.api.model.RestaurantDetailsResponseAddressState;
+import com.upgrad.FoodOrderingApp.api.model.*;
 import com.upgrad.FoodOrderingApp.service.businness.RestaurantService;
+import com.upgrad.FoodOrderingApp.service.common.UnexpectedException;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
@@ -34,24 +32,33 @@ public class RestaurantController {
      * @return List of RestaurantDetailsResponse
      */
     @RequestMapping(method = RequestMethod.GET, path = "restaurant", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<List<RestaurantDetailsResponse>> getAllRestaurants() {
+    public ResponseEntity<RestaurantListResponse> getAllRestaurants() {
         // TODO 1. - authorize token, return 401 UNAUTHORIZED if provided wrong credentials
-        // TODO 2. - INTERNAL SERVER ERROR in case of unexpected error
-        List<RestaurantDetailsResponse> responses = new ArrayList<>();
-        for (RestaurantEntity restaurantEntity : restaurantService.getAllRestaurants()) {
-            RestaurantDetailsResponse restaurantDetailsResponse = new RestaurantDetailsResponse();
-            restaurantDetailsResponse.setId(UUID.fromString(restaurantEntity.getUuid()));
-            restaurantDetailsResponse.setAddress(getRestaurantAddressResp(restaurantEntity));
-            restaurantDetailsResponse.setAveragePrice(restaurantEntity.getAverage_price_for_two());
-            restaurantDetailsResponse.setCategories(getRestaurantCategoryResp(restaurantEntity.getRestaurantCategories()));
-            restaurantDetailsResponse.setCustomerRating(restaurantEntity.getCustomer_rating());
-            restaurantDetailsResponse.setNumberCustomersRated(restaurantEntity.getNumber_of_customers_rated());
-            restaurantDetailsResponse.setPhotoURL(restaurantEntity.getPhoto_url());
-            restaurantDetailsResponse.setRestaurantName(restaurantEntity.getRestaurant_name());
-            responses.add(restaurantDetailsResponse);
+        RestaurantListResponse restaurantListResponse = new RestaurantListResponse();
+        List<RestaurantList> restaurantLists = new ArrayList<>();
+        restaurantListResponse.setRestaurants(restaurantLists);
+        try {
+            for (RestaurantEntity restaurantEntity : restaurantService.getAllRestaurants()) {
+                RestaurantDetailsResponse restaurantDetailsResponse = new RestaurantDetailsResponse();
+                RestaurantList restaurant = new RestaurantList();
+
+                restaurant.setAddress(getRestaurantAddressResp(restaurantEntity));
+                restaurant.setAveragePrice(restaurantEntity.getAverage_price_for_two());
+                String categoryString = getRestaurantCategoryString(restaurantEntity.getRestaurantCategories());
+                restaurant.setCategories(categoryString);
+                restaurant.setCustomerRating(restaurantEntity.getCustomer_rating());
+                restaurant.setNumberCustomersRated(restaurantEntity.getNumber_of_customers_rated());
+                restaurant.setPhotoURL(restaurantEntity.getPhoto_url());
+                restaurant.setRestaurantName(restaurantEntity.getRestaurant_name());
+                restaurantLists.add(restaurant);
+            }
+            return new ResponseEntity(restaurantListResponse, HttpStatus.OK);
+            // INTERNAL SERVER ERROR in case of unexpected error
+        } catch (UnexpectedException ue) {
+            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(responses, HttpStatus.OK);
     }
+
 
     /**
      * Prepare a restaurant detail response
@@ -84,18 +91,12 @@ public class RestaurantController {
     }
 
     /**
-     * Prepares the response object of Restaurant category
+     * Prepares the detailed response object of Restaurant category
+     *
      * @param restaurantCategory
      * @return restaurant category in alphabetical order
      */
     private List<CategoryList> getRestaurantCategoryResp(List<CategoryEntity> restaurantCategory) {
-        // sort category alphabetically
-        Collections.sort(restaurantCategory, new Comparator<CategoryEntity>() {
-            @Override
-            public int compare(CategoryEntity o1, CategoryEntity o2) {
-                return o1.getCategoryName().compareTo(o2.getCategoryName());
-            }
-        });
         List<CategoryList> categoryListList = new ArrayList<>();
         for (CategoryEntity category : restaurantCategory) {
             CategoryList categoryList = new CategoryList();
@@ -104,5 +105,29 @@ public class RestaurantController {
             categoryListList.add(categoryList);
         }
         return categoryListList;
+    }
+
+    /**
+     * @param restaurantCategory
+     * @return - comma separated string of categories of restaurant
+     */
+    private String getRestaurantCategoryString(List<CategoryEntity> restaurantCategory) {
+        // sort category alphabetically
+        Collections.sort(restaurantCategory, new Comparator<CategoryEntity>() {
+            @Override
+            public int compare(CategoryEntity o1, CategoryEntity o2) {
+                return o1.getCategoryName().compareTo(o2.getCategoryName());
+            }
+        });
+
+        StringBuilder category = new StringBuilder();
+        Iterator<CategoryEntity> itr = restaurantCategory.iterator();
+        while (itr.hasNext()) {
+            category.append(itr.next().getCategoryName());
+            if (itr.hasNext()) {
+                category.append(",");
+            }
+        }
+        return category.toString();
     }
 }
