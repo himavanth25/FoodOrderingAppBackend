@@ -47,6 +47,9 @@ public class customerController {
         //The authorization header will be in the format "Basic base64encoded username:password"
         //First split the header and separate Basic to retrieve the base64encoded username:password
         //Decode the base64encoded string and split it based on : to retrieve username and password
+        if(!authorization.contains("Basic")){
+            throw new AuthenticationFailedException("ATH-003","Incorrect format of decoded customer name and password");
+        }
         byte[] decode = Base64.getDecoder().decode(authorization.split("Basic ")[1]);
         String decodedText = new String(decode);
         String[] decodedArray = decodedText.split(":");

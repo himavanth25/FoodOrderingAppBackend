@@ -58,18 +58,18 @@ public class CustomerService {
     @Transactional(propagation = Propagation.REQUIRED)
     public CustomerAuthTokenEntity signin(final String userName, final String password) throws AuthenticationFailedException {
         CustomerEntity userEntity = customerDao.getUserByUserName(userName);
-        final String encryptedPassword = cryptographyProvider.encrypt(password, userEntity.getSalt());
+
         //Throw exception if given user name does not exist in database
-//        if(userEntity == null){
-//            throw new AuthenticationFailedException("ATH-001","This username does not exist");
-//        }
-//
-//
-//
-//        //Throw exception if provided password does not match with the password stored in database
-//        if(!encryptedPassword.equals(userEntity.getPassword())){
-//            throw new AuthenticationFailedException("ATH-002","Password failed");
-//        }
+        if(userEntity == null){
+            throw new AuthenticationFailedException("ATH-001","This contact number has not been registered!");
+        }
+
+        final String encryptedPassword = cryptographyProvider.encrypt(password, userEntity.getSalt());
+
+        //Throw exception if provided password does not match with the password stored in database
+        if(!encryptedPassword.equals(userEntity.getPassword())){
+            throw new AuthenticationFailedException("ATH-002","Invalid Credentials");
+        }
 
         //Construct a JWT token using JwtTokenProvider and persist it in the database before returning to controller
         JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(encryptedPassword);
