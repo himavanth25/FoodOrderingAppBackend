@@ -57,4 +57,8 @@ public class CustomerDao {
     public void updateLogOutTime(final CustomerAuthTokenEntity customerAuthTokenEntity){
         entityManager.merge(customerAuthTokenEntity);
     }
+
+    public void updateCustomerDetails(final CustomerEntity customerEntity){
+        entityManager.merge(customerEntity);
+    }
 }

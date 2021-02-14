@@ -111,4 +111,14 @@ public class CustomerService {
         customerDao.updateLogOutTime(userAuthToken);
         return userAuthToken.getUser();
     }
+    @Transactional(propagation = Propagation.REQUIRED)
+    public CustomerEntity updateCustomer(final String authorization,String firstName,String lastName)  {
+        CustomerAuthTokenEntity authTokenEntity= customerDao.getUserAuthTokenByAccessToken(authorization);
+        CustomerEntity customer=authTokenEntity.getUser();
+        customer.setFirstName(firstName);
+        customer.setLastName(lastName);
+        customerDao.updateCustomerDetails(customer);
+        return customer;
+    }
+
 }
