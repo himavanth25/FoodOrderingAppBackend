@@ -7,6 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "restaurant")
@@ -48,6 +49,12 @@ public class RestaurantEntity implements Serializable {
     @JoinColumn(name = "address_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private AddressEntity address_id;
+
+    @ManyToMany
+    @JoinTable(name = "RESTAURANT_CATEGORY",
+    joinColumns = @JoinColumn(name = "RESTAURANT_ID"),
+    inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
+    private List<CategoryEntity> restaurantCategories;
 
     public Integer getId() {
         return id;
@@ -111,5 +118,13 @@ public class RestaurantEntity implements Serializable {
 
     public void setAddress_id(AddressEntity address_id) {
         this.address_id = address_id;
+    }
+
+    public List<CategoryEntity> getRestaurantCategories() {
+        return restaurantCategories;
+    }
+
+    public void setRestaurantCategories(List<CategoryEntity> restaurantCategories) {
+        this.restaurantCategories = restaurantCategories;
     }
 }
