@@ -6,15 +6,14 @@ import com.upgrad.FoodOrderingApp.service.common.UnexpectedException;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
+import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.websocket.server.PathParam;
 import java.util.*;
 
 
@@ -37,19 +36,14 @@ public class RestaurantController {
         RestaurantListResponse restaurantListResponse = new RestaurantListResponse();
         List<RestaurantList> restaurantLists = new ArrayList<>();
         restaurantListResponse.setRestaurants(restaurantLists);
-        try {
-            for (RestaurantEntity restaurantEntity : restaurantService.getAllRestaurants()) {
-                RestaurantDetailsResponse restaurantDetailsResponse = new RestaurantDetailsResponse();
-                RestaurantList restaurant = new RestaurantList();
 
-                restaurant.setAddress(getRestaurantAddressResp(restaurantEntity));
-                restaurant.setAveragePrice(restaurantEntity.getAverage_price_for_two());
-                String categoryString = getRestaurantCategoryString(restaurantEntity.getRestaurantCategories());
-                restaurant.setCategories(categoryString);
-                restaurant.setCustomerRating(restaurantEntity.getCustomer_rating());
-                restaurant.setNumberCustomersRated(restaurantEntity.getNumber_of_customers_rated());
-                restaurant.setPhotoURL(restaurantEntity.getPhoto_url());
-                restaurant.setRestaurantName(restaurantEntity.getRestaurant_name());
+        try {
+            List<RestaurantEntity> allRestaurants = restaurantService.getAllRestaurants();
+            if (allRestaurants.isEmpty()) {
+                return new ResponseEntity(restaurantListResponse, HttpStatus.NO_CONTENT);
+            }
+            for (RestaurantEntity restaurantEntity : allRestaurants) {
+                RestaurantList restaurant = getRestaurantResponse(restaurantEntity);
                 restaurantLists.add(restaurant);
             }
             return new ResponseEntity(restaurantListResponse, HttpStatus.OK);
@@ -59,9 +53,48 @@ public class RestaurantController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = "restaurant/name/{reastaurant_name}")
+    public ResponseEntity<RestaurantListResponse> getRestaurantsByName(@RequestBody(required = false) @PathParam("reastaurant_name") final String searchName) throws RestaurantNotFoundException {
+        if (searchName == null || searchName.isEmpty()) {
+            throw new RestaurantNotFoundException("RNF-003", "Restaurant name field should not be empty");
+        }
+        RestaurantListResponse restaurantListResponse = new RestaurantListResponse();
+        List<RestaurantList> restaurantLists = new ArrayList<>();
+        restaurantListResponse.setRestaurants(restaurantLists);
+
+        List<RestaurantEntity> allRestaurants = restaurantService.getAllRestaurantsByName(searchName);
+        if (!allRestaurants.isEmpty()) {
+            return new ResponseEntity(restaurantListResponse, HttpStatus.NO_CONTENT);
+        }
+        for (RestaurantEntity restaurantEntity : allRestaurants) {
+            RestaurantList restaurant = getRestaurantResponse(restaurantEntity);
+            restaurantLists.add(restaurant);
+        }
+
+        return new ResponseEntity(restaurantListResponse, HttpStatus.OK);
+    }
 
     /**
-     * Prepare a restaurant detail response
+     * Prepares a restaurant responseList
+     *
+     * @param restaurantEntity - restaurant Entity
+     * @return restaurant responseList
+     */
+    private RestaurantList getRestaurantResponse(RestaurantEntity restaurantEntity) {
+        RestaurantList restaurant = new RestaurantList();
+        restaurant.setAddress(getRestaurantAddressResp(restaurantEntity));
+        restaurant.setAveragePrice(restaurantEntity.getAverage_price_for_two());
+        String categoryString = getRestaurantCategoryString(restaurantEntity.getRestaurantCategories());
+        restaurant.setCategories(categoryString);
+        restaurant.setCustomerRating(restaurantEntity.getCustomer_rating());
+        restaurant.setNumberCustomersRated(restaurantEntity.getNumber_of_customers_rated());
+        restaurant.setPhotoURL(restaurantEntity.getPhoto_url());
+        restaurant.setRestaurantName(restaurantEntity.getRestaurant_name());
+        return restaurant;
+    }
+
+    /**
+     * Prepare a restaurant Address response
      *
      * @param restaurantEntity - restaurant Entity
      * @return RestaurantDetailsResponseAddress

@@ -12,7 +12,8 @@ import java.util.List;
 @Entity
 @Table(name = "restaurant")
 @NamedQueries({
-        @NamedQuery(name = "getAllRestaurants", query = "select q from RestaurantEntity q order by q.customer_rating desc")
+        @NamedQuery(name = "getAllRestaurants", query = "select q from RestaurantEntity q order by q.customer_rating desc"),
+        @NamedQuery(name = "restaurantByName", query = "select q from RestaurantEntity q where lower(q.restaurant_name) like lower(:searchResName) order by q.customer_rating desc")
 })
 public class RestaurantEntity implements Serializable {
 
@@ -52,8 +53,8 @@ public class RestaurantEntity implements Serializable {
 
     @ManyToMany
     @JoinTable(name = "RESTAURANT_CATEGORY",
-    joinColumns = @JoinColumn(name = "RESTAURANT_ID"),
-    inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
+            joinColumns = @JoinColumn(name = "RESTAURANT_ID"),
+            inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
     private List<CategoryEntity> restaurantCategories;
 
     public Integer getId() {
