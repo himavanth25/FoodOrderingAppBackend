@@ -19,11 +19,11 @@ public class RestaurantDao {
     private EntityManager entityManager;
 
     public List<RestaurantEntity> getAllRestaurants() {
-        return entityManager.createNamedQuery("getAllRestaurants", RestaurantEntity.class).getResultList();
+        return entityManager.createNamedQuery("restaurants", RestaurantEntity.class).getResultList();
     }
 
     public List<RestaurantEntity> getAllRestaurantsByName(String searchResName){
-        TypedQuery<RestaurantEntity> restaurants = entityManager.createNamedQuery("getAllRestaurants", RestaurantEntity.class);
+        TypedQuery<RestaurantEntity> restaurants = entityManager.createNamedQuery("restaurantByName", RestaurantEntity.class);
         restaurants.setParameter("searchResName", "%" + searchResName + "%");
         return restaurants.getResultList();
     }

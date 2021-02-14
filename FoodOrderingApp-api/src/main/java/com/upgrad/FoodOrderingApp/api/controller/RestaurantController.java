@@ -8,6 +8,7 @@ import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -53,23 +54,24 @@ public class RestaurantController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "restaurant/name/{reastaurant_name}")
-    public ResponseEntity<RestaurantListResponse> getRestaurantsByName(@RequestBody(required = false) @PathParam("reastaurant_name") final String searchName) throws RestaurantNotFoundException {
-        if (searchName == null || searchName.isEmpty()) {
+    @RequestMapping(method = RequestMethod.GET, path = "restaurant/name/{restaurantName}")
+    @Procedure(MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<RestaurantListResponse> getRestaurantsByName(@RequestBody(required = false) @PathVariable("restaurantName") final String restaurantName) throws RestaurantNotFoundException {
+        if (restaurantName == null || restaurantName.isEmpty()) {
             throw new RestaurantNotFoundException("RNF-003", "Restaurant name field should not be empty");
         }
         RestaurantListResponse restaurantListResponse = new RestaurantListResponse();
         List<RestaurantList> restaurantLists = new ArrayList<>();
-        restaurantListResponse.setRestaurants(restaurantLists);
 
-        List<RestaurantEntity> allRestaurants = restaurantService.getAllRestaurantsByName(searchName);
-        if (!allRestaurants.isEmpty()) {
+        List<RestaurantEntity> allRestaurants = restaurantService.getAllRestaurantsByName(restaurantName);
+        if (allRestaurants.isEmpty()) {
             return new ResponseEntity(restaurantListResponse, HttpStatus.NO_CONTENT);
         }
         for (RestaurantEntity restaurantEntity : allRestaurants) {
             RestaurantList restaurant = getRestaurantResponse(restaurantEntity);
             restaurantLists.add(restaurant);
         }
+        restaurantListResponse.setRestaurants(restaurantLists);
 
         return new ResponseEntity(restaurantListResponse, HttpStatus.OK);
     }
