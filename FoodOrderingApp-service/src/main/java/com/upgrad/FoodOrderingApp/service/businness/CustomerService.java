@@ -40,6 +40,10 @@ public class CustomerService {
             throw new SignUpRestrictedException("SGR-002","Invalid email-id format!");
         }
 
+        if(!customerEntity.getPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\\\S+$).{8, 20}$")){
+            throw new SignUpRestrictedException("SGR-004","Weak password!");
+        }
+
         //Get encrypted password from cryptography provider, the method returns an array of Strings
         //Salt will be at index 0 in the return array and encrypted password will be at index 1
         String[] encryptedText = cryptographyProvider.encrypt(customerEntity.getPassword());
