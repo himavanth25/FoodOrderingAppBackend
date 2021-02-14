@@ -4,6 +4,7 @@ import com.upgrad.FoodOrderingApp.service.entity.CustomerEntity;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 
 @Repository
@@ -15,5 +16,15 @@ public class CustomerDao {
     public CustomerEntity createUser(CustomerEntity customerEntity){
         entityManager.persist(customerEntity);
         return customerEntity;
+    }
+
+    public CustomerEntity getUserByPhoneNumber(final String phoneNumer){
+        try {
+            return entityManager.createNamedQuery("userByPhone", CustomerEntity.class).setParameter("phone",phoneNumer)
+                    .getSingleResult();
+        }
+        catch (NoResultException nre){
+            return null;
+        }
     }
 }

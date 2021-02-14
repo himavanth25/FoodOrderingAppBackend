@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Table(name = "customer", schema = "public")
 @NamedQueries(
         {
-           //     @NamedQuery(name = "userByUuid", query = "select u from CustomerEntity u where u.uuid = :uuid"),
+                @NamedQuery(name = "userByPhone", query = "select u from CustomerEntity u where u.contactNumber =:phone"),
 
         }
 )
@@ -36,7 +36,6 @@ public class CustomerEntity implements Serializable{
     private String firstName;
 
     @Column(name = "LASTNAME")
-    @NotNull
     @Size(max = 30)
     private String lastName;
 
