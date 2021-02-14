@@ -10,7 +10,7 @@ import java.time.ZonedDateTime;
 @Table(name = "customer_auth", schema = "public")
 @NamedQueries(
         {
-            //    @NamedQuery(name = "userByUuid", query = "select u from CustomerEntity u where u.uuid = :uuid"),
+                @NamedQuery(name = "userAuthTokenByAccessToken" , query = "select ut from CustomerAuthTokenEntity ut where ut.accessToken = :accessToken ")
 
         }
 )

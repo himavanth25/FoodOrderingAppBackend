@@ -1,6 +1,7 @@
 package com.upgrad.FoodOrderingApp.api.controller;
 
 import com.upgrad.FoodOrderingApp.api.model.LoginResponse;
+import com.upgrad.FoodOrderingApp.api.model.LogoutResponse;
 import com.upgrad.FoodOrderingApp.api.model.SignupCustomerRequest;
 import com.upgrad.FoodOrderingApp.api.model.SignupCustomerResponse;
 import com.upgrad.FoodOrderingApp.service.businness.CustomerService;
@@ -68,5 +69,17 @@ public class customerController {
         HttpHeaders headers = new HttpHeaders();
         headers.add("access_token",userAuthToken.getAccessToken());
         return new ResponseEntity<LoginResponse>(loginResponse,headers,HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "/user/logout", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<LogoutResponse> logout(@RequestHeader("authorization") final String authorization) throws  AuthenticationFailedException {
+        //Authorization header will be in the format "Bearer JWT-token"
+        //Split the authorization header based on "Bearer " prefix to extract only the JWT token required for service class
+        //If authorization header doesn't contain "Bearer " prefix then pass it as it is since it will be from test cases
+        String authToken = authorization.startsWith("Bearer ")? authorization.split("Bearer ")[1]: authorization;
+        CustomerEntity customerEntity = customerService.signout(authToken);
+
+        LogoutResponse signoutResponse = new LogoutResponse().id(customerEntity.getUuid()).message("LOGGED OUT SUCCESSFULLY");
+        return new ResponseEntity<LogoutResponse>(signoutResponse, HttpStatus.OK);
     }
 }

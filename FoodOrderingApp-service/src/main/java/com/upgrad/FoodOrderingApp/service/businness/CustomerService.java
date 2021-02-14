@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -85,5 +87,28 @@ public class CustomerService {
         customerDao.createAuthToken(userAuthToken);
 
         return userAuthToken;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public CustomerEntity signout(final String authorization) throws AuthenticationFailedException {
+
+        CustomerAuthTokenEntity userAuthToken = customerDao.getUserAuthTokenByAccessToken(authorization);
+
+        //Throw exception if either the JWT access token is invalid orer if the user has already signed out
+        //In case user has already signed out then the logout time of the user will not be null
+        if(userAuthToken == null ) {
+            throw new AuthenticationFailedException("ATHR-001", "Customer is not Logged in.");
+        }
+        if((userAuthToken != null && userAuthToken.getLogoutAt() != null)) {
+            throw new AuthenticationFailedException("ATHR-002", "Customer is logged out. Log in again to access this endpoint.");
+        }
+        Duration duration=Duration.between(userAuthToken.getExpiresAt(),ZonedDateTime.now());
+        if((userAuthToken != null && duration.isNegative())) {
+            throw new AuthenticationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint.");
+        }
+
+        userAuthToken.setLogoutAt(ZonedDateTime.now());
+        customerDao.updateLogOutTime(userAuthToken);
+        return userAuthToken.getUser();
     }
 }
