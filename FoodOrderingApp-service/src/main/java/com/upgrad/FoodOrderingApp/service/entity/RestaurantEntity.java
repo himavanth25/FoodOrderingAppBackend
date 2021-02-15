@@ -42,22 +42,28 @@ public class RestaurantEntity implements Serializable {
 
     @Column(name = "AVERAGE_PRICE_FOR_TWO")
     @NotNull
-    private Integer average_price_for_two;
+    private Integer averagePriceForTwo;
 
     @Column(name = "NUMBER_OF_CUSTOMERS_RATED")
     @NotNull
-    private Integer number_of_customers_rated;
+    private Integer numberOfCustomersRated;
 
     @ManyToOne
     @JoinColumn(name = "address_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private AddressEntity address_id;
+    private AddressEntity addressId;
 
     @ManyToMany()
     @JoinTable(name = "RESTAURANT_CATEGORY",
             joinColumns = @JoinColumn(name = "RESTAURANT_ID"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
     private List<CategoryEntity> restaurantCategories;
+
+    @ManyToMany
+    @JoinTable(name = "RESTAURANT_ITEM",
+            joinColumns = @JoinColumn(name = "RESTAURANT_ID"),
+            inverseJoinColumns = @JoinColumn(name = "ITEM_ID"))
+    private List<ItemEntity> restaurantItems;
 
     public Integer getId() {
         return id;
@@ -99,28 +105,28 @@ public class RestaurantEntity implements Serializable {
         this.customer_rating = customer_rating;
     }
 
-    public Integer getAverage_price_for_two() {
-        return average_price_for_two;
+    public Integer getAveragePriceForTwo() {
+        return averagePriceForTwo;
     }
 
-    public void setAverage_price_for_two(Integer average_price_for_two) {
-        this.average_price_for_two = average_price_for_two;
+    public void setAveragePriceForTwo(Integer average_price_for_two) {
+        this.averagePriceForTwo = average_price_for_two;
     }
 
-    public Integer getNumber_of_customers_rated() {
-        return number_of_customers_rated;
+    public Integer getNumberOfCustomersRated() {
+        return numberOfCustomersRated;
     }
 
-    public void setNumber_of_customers_rated(Integer number_of_customers_rated) {
-        this.number_of_customers_rated = number_of_customers_rated;
+    public void setNumberOfCustomersRated(Integer number_of_customers_rated) {
+        this.numberOfCustomersRated = number_of_customers_rated;
     }
 
-    public AddressEntity getAddress_id() {
-        return address_id;
+    public AddressEntity getAddressId() {
+        return addressId;
     }
 
-    public void setAddress_id(AddressEntity address_id) {
-        this.address_id = address_id;
+    public void setAddressId(AddressEntity address_id) {
+        this.addressId = address_id;
     }
 
     public List<CategoryEntity> getRestaurantCategories() {
@@ -129,5 +135,13 @@ public class RestaurantEntity implements Serializable {
 
     public void setRestaurantCategories(List<CategoryEntity> restaurantCategories) {
         this.restaurantCategories = restaurantCategories;
+    }
+
+    public List<ItemEntity> getRestaurantItems() {
+        return restaurantItems;
+    }
+
+    public void setRestaurantItems(List<ItemEntity> restaurantItems) {
+        this.restaurantItems = restaurantItems;
     }
 }

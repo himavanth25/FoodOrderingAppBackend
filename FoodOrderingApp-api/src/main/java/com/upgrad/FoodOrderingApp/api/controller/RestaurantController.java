@@ -9,13 +9,11 @@ import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.websocket.server.PathParam;
 import java.util.*;
 
 
@@ -130,10 +128,10 @@ public class RestaurantController {
         RestaurantDetailsResponse restaurantDetailsResponse = new RestaurantDetailsResponse();
         restaurantDetailsResponse.setId(UUID.fromString(restaurantEntity.getUuid()));
         restaurantDetailsResponse.setAddress(getRestaurantAddressResp(restaurantEntity));
-        restaurantDetailsResponse.setAveragePrice(restaurantEntity.getAverage_price_for_two());
+        restaurantDetailsResponse.setAveragePrice(restaurantEntity.getAveragePriceForTwo());
         restaurantDetailsResponse.setCategories(getRestaurantCategoryResp(restaurantEntity.getRestaurantCategories()));
         restaurantDetailsResponse.setCustomerRating(restaurantEntity.getCustomer_rating());
-        restaurantDetailsResponse.setNumberCustomersRated(restaurantEntity.getNumber_of_customers_rated());
+        restaurantDetailsResponse.setNumberCustomersRated(restaurantEntity.getNumberOfCustomersRated());
         restaurantDetailsResponse.setPhotoURL(restaurantEntity.getPhoto_url());
         restaurantDetailsResponse.setRestaurantName(restaurantEntity.getRestaurant_name());
         return restaurantDetailsResponse;
@@ -149,11 +147,11 @@ public class RestaurantController {
         RestaurantList restaurant = new RestaurantList();
         restaurant.setId(UUID.fromString(restaurantEntity.getUuid()));
         restaurant.setAddress(getRestaurantAddressResp(restaurantEntity));
-        restaurant.setAveragePrice(restaurantEntity.getAverage_price_for_two());
+        restaurant.setAveragePrice(restaurantEntity.getAveragePriceForTwo());
         String categoryString = getRestaurantCategoryString(restaurantEntity.getRestaurantCategories());
         restaurant.setCategories(categoryString);
         restaurant.setCustomerRating(restaurantEntity.getCustomer_rating());
-        restaurant.setNumberCustomersRated(restaurantEntity.getNumber_of_customers_rated());
+        restaurant.setNumberCustomersRated(restaurantEntity.getNumberOfCustomersRated());
         restaurant.setPhotoURL(restaurantEntity.getPhoto_url());
         restaurant.setRestaurantName(restaurantEntity.getRestaurant_name());
         return restaurant;
@@ -167,12 +165,12 @@ public class RestaurantController {
      */
     private RestaurantDetailsResponseAddress getRestaurantAddressResp(RestaurantEntity restaurantEntity) {
         RestaurantDetailsResponseAddress restaurantDetailsResponseAddress = new RestaurantDetailsResponseAddress();
-        restaurantDetailsResponseAddress.setCity(restaurantEntity.getAddress_id().getCity());
-        restaurantDetailsResponseAddress.setFlatBuildingName(restaurantEntity.getAddress_id().getFlat_buil_number());
-        restaurantDetailsResponseAddress.setId(UUID.fromString(restaurantEntity.getAddress_id().getUuid()));
-        restaurantDetailsResponseAddress.setLocality(restaurantEntity.getAddress_id().getLocality());
-        restaurantDetailsResponseAddress.setPincode(restaurantEntity.getAddress_id().getPincode());
-        restaurantDetailsResponseAddress.setState(getAddressStateResp(restaurantEntity.getAddress_id().getState_id()));
+        restaurantDetailsResponseAddress.setCity(restaurantEntity.getAddressId().getCity());
+        restaurantDetailsResponseAddress.setFlatBuildingName(restaurantEntity.getAddressId().getFlat_buil_number());
+        restaurantDetailsResponseAddress.setId(UUID.fromString(restaurantEntity.getAddressId().getUuid()));
+        restaurantDetailsResponseAddress.setLocality(restaurantEntity.getAddressId().getLocality());
+        restaurantDetailsResponseAddress.setPincode(restaurantEntity.getAddressId().getPincode());
+        restaurantDetailsResponseAddress.setState(getAddressStateResp(restaurantEntity.getAddressId().getState_id()));
         return restaurantDetailsResponseAddress;
     }
 
