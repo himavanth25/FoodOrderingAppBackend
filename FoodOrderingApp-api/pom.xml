@@ -36,7 +36,6 @@
             <version>2.6.1</version>
             <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>FoodOrderingApp-Backend</groupId>
             <artifactId>FoodOrderingApp-service</artifactId>
@@ -47,6 +46,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
