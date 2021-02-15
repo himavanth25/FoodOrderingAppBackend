@@ -1,11 +1,21 @@
 package com.upgrad.FoodOrderingApp.service.entity;
 
+import javax.persistence.Column;
+
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "STATE")
-public class StateEntity {
+@NamedQueries(
+        {
+                @NamedQuery(name = "stateByUuid", query = "select u from StateEntity u where u.uuid =:uuid"),
+
+        }
+)
+public class StateEntity implements Serializable {
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
