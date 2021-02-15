@@ -3,12 +3,22 @@ package com.upgrad.FoodOrderingApp.service.entity;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.*;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
+
+
+import javax.persistence.*;
+import java.io.Serializable;
+
 
 @Entity
 @Table(name = "address", schema = "public")
-public class AddressEntity {
+public class AddressEntity implements Serializable {
+
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +51,8 @@ public class AddressEntity {
 
     @Column(name = "ACTIVE")
     @NotNull
-    private String active;
+
+    private int active;
 
     public Integer getId() {
         return id;
@@ -99,11 +110,11 @@ public class AddressEntity {
         this.state_id = state_id;
     }
 
-    public String getActive() {
+    public int getActive() {
         return active;
     }
 
-    public void setActive(String active) {
+    public void setActive(int active) {
         this.active = active;
     }
 }

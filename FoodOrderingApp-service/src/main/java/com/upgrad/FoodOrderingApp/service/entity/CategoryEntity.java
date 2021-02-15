@@ -26,6 +26,12 @@ public class CategoryEntity {
     @ManyToMany(mappedBy = "restaurantCategories")
     private List<RestaurantEntity> restaurants;
 
+    @ManyToMany
+    @JoinTable(name = "CATEGORY_ITEM",
+            joinColumns = @JoinColumn(name = "CATEGORY_ID"),
+            inverseJoinColumns = @JoinColumn(name = "ITEM_ID"))
+    private List<ItemEntity> categoryItems;
+
     public Integer getId() {
         return id;
     }
@@ -56,5 +62,13 @@ public class CategoryEntity {
 
     public void setRestaurants(List<RestaurantEntity> restaurants) {
         this.restaurants = restaurants;
+    }
+
+    public List<ItemEntity> getCategoryItems() {
+        return categoryItems;
+    }
+
+    public void setCategoryItems(List<ItemEntity> categoryItems) {
+        this.categoryItems = categoryItems;
     }
 }

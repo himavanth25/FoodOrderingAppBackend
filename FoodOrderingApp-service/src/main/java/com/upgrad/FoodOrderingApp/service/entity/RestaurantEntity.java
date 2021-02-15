@@ -12,8 +12,10 @@ import java.util.List;
 @Entity
 @Table(name = "restaurant")
 @NamedQueries({
-        @NamedQuery(name = "restaurants", query = "select q from RestaurantEntity q order by q.customer_rating desc"),
-        @NamedQuery(name = "restaurantByName", query = "select q from RestaurantEntity q where lower(q.restaurant_name) like lower(:searchResName) order by q.customer_rating desc")
+        @NamedQuery(name = "restaurants", query = "select q from RestaurantEntity q order by q.customerRating desc"),
+        @NamedQuery(name = "restaurantByName", query = "select q from RestaurantEntity q where lower(q.restaurant_name)" +
+                " like lower(:searchResName) order by q.customerRating desc"),
+        @NamedQuery(name = "restauranById", query = "select q from RestaurantEntity q where q.uuid = :uuid"),
 })
 public class RestaurantEntity implements Serializable {
 
@@ -32,30 +34,36 @@ public class RestaurantEntity implements Serializable {
 
     @Column(name = "PHOTO_URL")
     @NotNull
-    private String photo_url;
+    private String photoUrl;
 
     @Column(name = "CUSTOMER_RATING")
     @NotNull
-    private BigDecimal customer_rating;
+    private BigDecimal customerRating;
 
     @Column(name = "AVERAGE_PRICE_FOR_TWO")
     @NotNull
-    private Integer average_price_for_two;
+    private Integer averagePriceForTwo;
 
     @Column(name = "NUMBER_OF_CUSTOMERS_RATED")
     @NotNull
-    private Integer number_of_customers_rated;
+    private Integer numberOfCustomersRated;
 
     @ManyToOne
     @JoinColumn(name = "address_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private AddressEntity address_id;
+    private AddressEntity addressId;
 
     @ManyToMany()
     @JoinTable(name = "RESTAURANT_CATEGORY",
             joinColumns = @JoinColumn(name = "RESTAURANT_ID"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
     private List<CategoryEntity> restaurantCategories;
+
+    @ManyToMany
+    @JoinTable(name = "RESTAURANT_ITEM",
+            joinColumns = @JoinColumn(name = "RESTAURANT_ID"),
+            inverseJoinColumns = @JoinColumn(name = "ITEM_ID"))
+    private List<ItemEntity> restaurantItems;
 
     public Integer getId() {
         return id;
@@ -81,44 +89,44 @@ public class RestaurantEntity implements Serializable {
         this.restaurant_name = restaurant_name;
     }
 
-    public String getPhoto_url() {
-        return photo_url;
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
-    public void setPhoto_url(String photo_url) {
-        this.photo_url = photo_url;
+    public void setPhotoUrl(String photo_url) {
+        this.photoUrl = photo_url;
     }
 
-    public BigDecimal getCustomer_rating() {
-        return customer_rating;
+    public BigDecimal getCustomerRating() {
+        return customerRating;
     }
 
-    public void setCustomer_rating(BigDecimal customer_rating) {
-        this.customer_rating = customer_rating;
+    public void setCustomerRating(BigDecimal customer_rating) {
+        this.customerRating = customer_rating;
     }
 
-    public Integer getAverage_price_for_two() {
-        return average_price_for_two;
+    public Integer getAveragePriceForTwo() {
+        return averagePriceForTwo;
     }
 
-    public void setAverage_price_for_two(Integer average_price_for_two) {
-        this.average_price_for_two = average_price_for_two;
+    public void setAveragePriceForTwo(Integer average_price_for_two) {
+        this.averagePriceForTwo = average_price_for_two;
     }
 
-    public Integer getNumber_of_customers_rated() {
-        return number_of_customers_rated;
+    public Integer getNumberOfCustomersRated() {
+        return numberOfCustomersRated;
     }
 
-    public void setNumber_of_customers_rated(Integer number_of_customers_rated) {
-        this.number_of_customers_rated = number_of_customers_rated;
+    public void setNumberOfCustomersRated(Integer number_of_customers_rated) {
+        this.numberOfCustomersRated = number_of_customers_rated;
     }
 
-    public AddressEntity getAddress_id() {
-        return address_id;
+    public AddressEntity getAddressId() {
+        return addressId;
     }
 
-    public void setAddress_id(AddressEntity address_id) {
-        this.address_id = address_id;
+    public void setAddressId(AddressEntity address_id) {
+        this.addressId = address_id;
     }
 
     public List<CategoryEntity> getRestaurantCategories() {
@@ -127,5 +135,13 @@ public class RestaurantEntity implements Serializable {
 
     public void setRestaurantCategories(List<CategoryEntity> restaurantCategories) {
         this.restaurantCategories = restaurantCategories;
+    }
+
+    public List<ItemEntity> getRestaurantItems() {
+        return restaurantItems;
+    }
+
+    public void setRestaurantItems(List<ItemEntity> restaurantItems) {
+        this.restaurantItems = restaurantItems;
     }
 }
