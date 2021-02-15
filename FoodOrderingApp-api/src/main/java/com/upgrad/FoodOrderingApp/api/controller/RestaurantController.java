@@ -7,7 +7,9 @@ import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
 import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
+import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
+import com.upgrad.FoodOrderingApp.service.exception.InvalidRatingException;
 import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,7 @@ public class RestaurantController {
 
     @Autowired
     private RestaurantService restaurantService;
+
 
     /**
      * End point for getting detailed list of all restaurants
@@ -110,6 +113,7 @@ public class RestaurantController {
 
     /**
      * End point to get Restaurant details of a restaurant
+     *
      * @param restaurantUUID
      * @return RestaurantDetailsResponse
      * @throws RestaurantNotFoundException
@@ -125,15 +129,43 @@ public class RestaurantController {
         return new ResponseEntity<>(getRestaurantDetailsResponse(restaurantEntity), HttpStatus.OK);
     }
 
+    /**
+     * Updates
+     *
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, path = "/api/restaurant/{restaurant_id}",
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<RestaurantUpdatedResponse> updateRestaurantDetails(
+            @RequestBody @RequestParam(name = "customerRating") final Double rating,
+            @RequestBody @PathVariable("restaurant_id") final String restaurantUUID,
+            @RequestBody @RequestHeader("authorization") final String authToken)
+            throws AuthenticationFailedException, RestaurantNotFoundException, InvalidRatingException {
+
+        // authenticate logger-In user by checking its had valid auth token
+        restaurantService.authenticate(authToken);
+        if (restaurantUUID == null || restaurantUUID.isEmpty()) {
+            throw new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty)");
+        }
+        if (rating < 1 || rating > 5) {
+            throw new InvalidRatingException("IRE-001", "Restaurant should be in the range of 1 to 5");
+        }
+        RestaurantUpdatedResponse restaurantUpdatedResponse = new RestaurantUpdatedResponse();
+        RestaurantEntity restaurantEntity = restaurantService.updateRating(rating, restaurantUUID);
+        restaurantUpdatedResponse.setId(UUID.fromString(restaurantEntity.getUuid()));
+        restaurantUpdatedResponse.setStatus("RESTAURANT RATING UPDATED SUCCESSFULLY");
+        return new ResponseEntity<>(restaurantUpdatedResponse, HttpStatus.OK);
+    }
+
     private RestaurantDetailsResponse getRestaurantDetailsResponse(RestaurantEntity restaurantEntity) {
         RestaurantDetailsResponse restaurantDetailsResponse = new RestaurantDetailsResponse();
         restaurantDetailsResponse.setId(UUID.fromString(restaurantEntity.getUuid()));
         restaurantDetailsResponse.setAddress(getRestaurantAddressResp(restaurantEntity));
         restaurantDetailsResponse.setAveragePrice(restaurantEntity.getAveragePriceForTwo());
         restaurantDetailsResponse.setCategories(getRestaurantCategoryResp(restaurantEntity.getRestaurantCategories()));
-        restaurantDetailsResponse.setCustomerRating(restaurantEntity.getCustomer_rating());
+        restaurantDetailsResponse.setCustomerRating(restaurantEntity.getCustomerRating());
         restaurantDetailsResponse.setNumberCustomersRated(restaurantEntity.getNumberOfCustomersRated());
-        restaurantDetailsResponse.setPhotoURL(restaurantEntity.getPhoto_url());
+        restaurantDetailsResponse.setPhotoURL(restaurantEntity.getPhotoUrl());
         restaurantDetailsResponse.setRestaurantName(restaurantEntity.getRestaurant_name());
         return restaurantDetailsResponse;
     }
@@ -151,9 +183,9 @@ public class RestaurantController {
         restaurant.setAveragePrice(restaurantEntity.getAveragePriceForTwo());
         String categoryString = getRestaurantCategoryString(restaurantEntity.getRestaurantCategories());
         restaurant.setCategories(categoryString);
-        restaurant.setCustomerRating(restaurantEntity.getCustomer_rating());
+        restaurant.setCustomerRating(restaurantEntity.getCustomerRating());
         restaurant.setNumberCustomersRated(restaurantEntity.getNumberOfCustomersRated());
-        restaurant.setPhotoURL(restaurantEntity.getPhoto_url());
+        restaurant.setPhotoURL(restaurantEntity.getPhotoUrl());
         restaurant.setRestaurantName(restaurantEntity.getRestaurant_name());
         return restaurant;
     }
@@ -208,19 +240,19 @@ public class RestaurantController {
 
     /**
      * prepares response List of items in a category
+     *
      * @param items
      * @return
      */
     private List<ItemList> getItemListResp(List<ItemEntity> items) {
         List<ItemList> itemList = new ArrayList<>();
-        for(ItemEntity item : items){
+        for (ItemEntity item : items) {
             ItemList itemDetail = new ItemList();
             itemDetail.setId(UUID.fromString(item.getUuid()));
             itemDetail.setItemName(item.getItemName());
-            if(item.getType() == 0){
+            if (item.getType() == 0) {
                 itemDetail.setItemType(ItemList.ItemTypeEnum.VEG);
-            }
-            else{
+            } else {
                 itemDetail.setItemType(ItemList.ItemTypeEnum.NON_VEG);
             }
             itemDetail.setPrice(item.getPrice().intValue());

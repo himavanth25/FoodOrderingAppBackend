@@ -12,9 +12,9 @@ import java.util.List;
 @Entity
 @Table(name = "restaurant")
 @NamedQueries({
-        @NamedQuery(name = "restaurants", query = "select q from RestaurantEntity q order by q.customer_rating desc"),
+        @NamedQuery(name = "restaurants", query = "select q from RestaurantEntity q order by q.customerRating desc"),
         @NamedQuery(name = "restaurantByName", query = "select q from RestaurantEntity q where lower(q.restaurant_name)" +
-                " like lower(:searchResName) order by q.customer_rating desc"),
+                " like lower(:searchResName) order by q.customerRating desc"),
         @NamedQuery(name = "restauranById", query = "select q from RestaurantEntity q where q.uuid = :uuid"),
 })
 public class RestaurantEntity implements Serializable {
@@ -34,11 +34,11 @@ public class RestaurantEntity implements Serializable {
 
     @Column(name = "PHOTO_URL")
     @NotNull
-    private String photo_url;
+    private String photoUrl;
 
     @Column(name = "CUSTOMER_RATING")
     @NotNull
-    private BigDecimal customer_rating;
+    private BigDecimal customerRating;
 
     @Column(name = "AVERAGE_PRICE_FOR_TWO")
     @NotNull
@@ -89,20 +89,20 @@ public class RestaurantEntity implements Serializable {
         this.restaurant_name = restaurant_name;
     }
 
-    public String getPhoto_url() {
-        return photo_url;
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
-    public void setPhoto_url(String photo_url) {
-        this.photo_url = photo_url;
+    public void setPhotoUrl(String photo_url) {
+        this.photoUrl = photo_url;
     }
 
-    public BigDecimal getCustomer_rating() {
-        return customer_rating;
+    public BigDecimal getCustomerRating() {
+        return customerRating;
     }
 
-    public void setCustomer_rating(BigDecimal customer_rating) {
-        this.customer_rating = customer_rating;
+    public void setCustomerRating(BigDecimal customer_rating) {
+        this.customerRating = customer_rating;
     }
 
     public Integer getAveragePriceForTwo() {
