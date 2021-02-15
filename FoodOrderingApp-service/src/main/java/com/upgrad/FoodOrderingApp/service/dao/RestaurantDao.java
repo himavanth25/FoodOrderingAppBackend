@@ -2,6 +2,7 @@ package com.upgrad.FoodOrderingApp.service.dao;
 
 import com.upgrad.FoodOrderingApp.service.common.UnexpectedException;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
+import com.upgrad.FoodOrderingApp.service.exception.RestaurantNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -27,5 +28,16 @@ public class RestaurantDao {
                 RestaurantEntity.class);
         restaurants.setParameter("searchResName", "%" + searchResName + "%");
         return restaurants.getResultList();
+    }
+
+    public RestaurantEntity getRestaurantsById(String restaurantUUID) throws RestaurantNotFoundException {
+        TypedQuery<RestaurantEntity> restaurant = entityManager.createNamedQuery("restauranById", RestaurantEntity.class);
+        restaurant.setParameter("uuid", restaurantUUID);
+        // Should always get 1 record from db
+        List<RestaurantEntity> resultList = restaurant.getResultList();
+        if(resultList.size() == 1){
+            return resultList.get(0);
+        }
+        throw new RestaurantNotFoundException("RNF-001", "No restaurant by this id");
     }
 }

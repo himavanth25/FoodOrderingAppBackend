@@ -45,7 +45,7 @@ public class RestaurantController {
                 return new ResponseEntity(restaurantListResponse, HttpStatus.NO_CONTENT);
             }
             for (RestaurantEntity restaurantEntity : allRestaurants) {
-                RestaurantList restaurant = getRestaurantResponse(restaurantEntity);
+                RestaurantList restaurant = getRestaurantListResponse(restaurantEntity);
                 restaurantLists.add(restaurant);
             }
             return new ResponseEntity(restaurantListResponse, HttpStatus.OK);
@@ -75,14 +75,20 @@ public class RestaurantController {
             return new ResponseEntity(restaurantListResponse, HttpStatus.NO_CONTENT);
         }
         for (RestaurantEntity restaurantEntity : allRestaurants) {
-            RestaurantList restaurant = getRestaurantResponse(restaurantEntity);
+            RestaurantList restaurant = getRestaurantListResponse(restaurantEntity);
             restaurantLists.add(restaurant);
         }
         restaurantListResponse.setRestaurants(restaurantLists);
         return new ResponseEntity(restaurantListResponse, HttpStatus.OK);
     }
 
-    // Get Restaurants by Category Id “/restaurant/category/{category_id}”
+    /**
+     * End point for geting restaurants from category Id
+     *
+     * @param categoryUUID - search category Id
+     * @return List of restaurants that serve searched category
+     * @throws CategoryNotFoundException
+     */
     @RequestMapping(method = RequestMethod.GET, path = "/restaurant/category/{category_id}",
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<RestaurantListResponse> getRestaurantByCategory(
@@ -96,11 +102,41 @@ public class RestaurantController {
 
         List<RestaurantEntity> allRestaurants = restaurantService.getAllRestaurantsByCategoryId(categoryUUID);
         for (RestaurantEntity restaurantEntity : allRestaurants) {
-            RestaurantList restaurant = getRestaurantResponse(restaurantEntity);
+            RestaurantList restaurant = getRestaurantListResponse(restaurantEntity);
             restaurantLists.add(restaurant);
         }
         restaurantListResponse.setRestaurants(restaurantLists);
         return new ResponseEntity<>(restaurantListResponse, HttpStatus.OK);
+    }
+
+    /**
+     * End point to get Restaurant details of a restaurant
+     * @param restaurantUUID
+     * @return RestaurantDetailsResponse
+     * @throws RestaurantNotFoundException
+     */
+    @RequestMapping(method = RequestMethod.GET, path = "/api/restaurant/{restaurant_id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<RestaurantDetailsResponse> getRestaurantById(
+            @RequestBody @PathVariable("restaurant_id") final String restaurantUUID)
+            throws RestaurantNotFoundException {
+        if (restaurantUUID == null || restaurantUUID.isEmpty()) {
+            throw new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty)");
+        }
+        RestaurantEntity restaurantEntity = restaurantService.getRestaurantsById(restaurantUUID);
+        return new ResponseEntity<>(getRestaurantDetailsResponse(restaurantEntity), HttpStatus.OK);
+    }
+
+    private RestaurantDetailsResponse getRestaurantDetailsResponse(RestaurantEntity restaurantEntity) {
+        RestaurantDetailsResponse restaurantDetailsResponse = new RestaurantDetailsResponse();
+        restaurantDetailsResponse.setId(UUID.fromString(restaurantEntity.getUuid()));
+        restaurantDetailsResponse.setAddress(getRestaurantAddressResp(restaurantEntity));
+        restaurantDetailsResponse.setAveragePrice(restaurantEntity.getAverage_price_for_two());
+        restaurantDetailsResponse.setCategories(getRestaurantCategoryResp(restaurantEntity.getRestaurantCategories()));
+        restaurantDetailsResponse.setCustomerRating(restaurantEntity.getCustomer_rating());
+        restaurantDetailsResponse.setNumberCustomersRated(restaurantEntity.getNumber_of_customers_rated());
+        restaurantDetailsResponse.setPhotoURL(restaurantEntity.getPhoto_url());
+        restaurantDetailsResponse.setRestaurantName(restaurantEntity.getRestaurant_name());
+        return restaurantDetailsResponse;
     }
 
     /**
@@ -109,7 +145,7 @@ public class RestaurantController {
      * @param restaurantEntity - restaurant Entity
      * @return restaurant responseList
      */
-    private RestaurantList getRestaurantResponse(RestaurantEntity restaurantEntity) {
+    private RestaurantList getRestaurantListResponse(RestaurantEntity restaurantEntity) {
         RestaurantList restaurant = new RestaurantList();
         restaurant.setId(UUID.fromString(restaurantEntity.getUuid()));
         restaurant.setAddress(getRestaurantAddressResp(restaurantEntity));
