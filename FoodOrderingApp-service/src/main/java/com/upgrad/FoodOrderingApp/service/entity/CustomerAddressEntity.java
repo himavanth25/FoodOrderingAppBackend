@@ -8,6 +8,12 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "customer_address", schema = "public")
+@NamedQueries(
+        {
+                @NamedQuery(name = "getAddressList" , query = "select ut from CustomerAddressEntity ut where ut.customerID = :id ")
+
+        }
+)
 public class CustomerAddressEntity implements Serializable {
 
     @Id

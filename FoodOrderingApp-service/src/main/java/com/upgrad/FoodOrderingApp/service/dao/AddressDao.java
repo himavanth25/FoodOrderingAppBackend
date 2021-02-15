@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import java.util.List;
 
 @Repository
 public class AddressDao {
@@ -30,6 +31,17 @@ public class AddressDao {
     public CustomerAddressEntity setCustomerAddress(CustomerAddressEntity addressEntity){
         entityManager.persist(addressEntity);
         return addressEntity;
+    }
+
+    public List<CustomerAddressEntity> getCustomerID(CustomerEntity id){
+
+        try {
+            return entityManager.createNamedQuery("getAddressList", CustomerAddressEntity.class).setParameter("id",id)
+                    .getResultList();
+        }
+        catch (NoResultException nre){
+            return null;
+        }
     }
 
 

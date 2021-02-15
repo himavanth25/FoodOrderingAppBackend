@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -65,5 +67,30 @@ public class AddressService {
 
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    public List<AddressEntity> getAllAddress(String authTokenEntity) throws SignUpRestrictedException, AuthenticationFailedException, SaveAddressException, AddressNotFoundException {
+
+        CustomerAuthTokenEntity customerAuthTokenEntity=customerDao.getUserAuthTokenByAccessToken(authTokenEntity);
+        if(customerAuthTokenEntity == null ) {
+            throw new AuthenticationFailedException("ATHR-001", "Customer is not Logged in.");
+        }
+        if((customerAuthTokenEntity != null && customerAuthTokenEntity.getLogoutAt() != null)) {
+            throw new AuthenticationFailedException("ATHR-002", "Customer is logged out. Log in again to access this endpoint.");
+        }
+        Duration duration=Duration.between(ZonedDateTime.now(),customerAuthTokenEntity.getExpiresAt());
+        if((customerAuthTokenEntity != null && duration.isNegative())) {
+            throw new AuthenticationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint.");
+        }
+
+        CustomerEntity customerEntity=customerAuthTokenEntity.getUser();
+        List<CustomerAddressEntity> addressID=addressDao.getCustomerID(customerEntity);
+        List<AddressEntity> addist=new ArrayList<>();
+        for (CustomerAddressEntity a:addressID) {
+            addist.add(a.getAddressID());
+        }
+        return addist;
+
+
+    }
 
 }
