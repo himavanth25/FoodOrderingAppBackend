@@ -5,6 +5,9 @@ import com.upgrad.FoodOrderingApp.service.businness.AddressService;
 
 import com.upgrad.FoodOrderingApp.service.entity.AddressEntity;
 
+import com.upgrad.FoodOrderingApp.service.exception.AddressNotFoundException;
+import com.upgrad.FoodOrderingApp.service.exception.AuthenticationFailedException;
+import com.upgrad.FoodOrderingApp.service.exception.SaveAddressException;
 import com.upgrad.FoodOrderingApp.service.exception.SignUpRestrictedException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +28,7 @@ public class addressController {
     AddressService addressService;
 
     @RequestMapping(method = RequestMethod.POST, path = "/address", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<SaveAddressResponse> saveAddress(@RequestHeader("authorization") final String authorization,final SaveAddressRequest saveAddressRequests) throws SignUpRestrictedException {
+    public ResponseEntity<SaveAddressResponse> saveAddress(@RequestHeader("authorization") final String authorization,final SaveAddressRequest saveAddressRequests) throws SignUpRestrictedException, AuthenticationFailedException, AddressNotFoundException, SaveAddressException {
         String authToken = authorization.startsWith("Bearer ") ? authorization.split("Bearer ")[1] : authorization;
         AddressEntity addressEntity = addressService.saveAddress(authToken,saveAddressRequests.getCity(),saveAddressRequests.getFlatBuildingName(),saveAddressRequests.getLocality()
                                     ,saveAddressRequests.getPincode(),saveAddressRequests.getStateUuid());
