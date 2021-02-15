@@ -4,6 +4,7 @@ package com.upgrad.FoodOrderingApp.service.entity;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "item")
@@ -28,6 +29,12 @@ public class ItemEntity {
     @NotNull
     @Column(name = "TYPE")
     private int type;
+
+    @ManyToMany(mappedBy = "restaurantItems")
+    private List<RestaurantEntity> restaurants;
+
+    @ManyToMany(mappedBy = "categoryItems")
+    private List<CategoryEntity> categories;
 
     public Integer getId() {
         return Id;

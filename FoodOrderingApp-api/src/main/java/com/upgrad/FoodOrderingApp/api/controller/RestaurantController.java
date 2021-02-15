@@ -4,6 +4,7 @@ import com.upgrad.FoodOrderingApp.api.model.*;
 import com.upgrad.FoodOrderingApp.service.businness.RestaurantService;
 import com.upgrad.FoodOrderingApp.service.common.UnexpectedException;
 import com.upgrad.FoodOrderingApp.service.entity.CategoryEntity;
+import com.upgrad.FoodOrderingApp.service.entity.ItemEntity;
 import com.upgrad.FoodOrderingApp.service.entity.RestaurantEntity;
 import com.upgrad.FoodOrderingApp.service.entity.StateEntity;
 import com.upgrad.FoodOrderingApp.service.exception.CategoryNotFoundException;
@@ -199,9 +200,33 @@ public class RestaurantController {
             CategoryList categoryList = new CategoryList();
             categoryList.setCategoryName(category.getCategoryName());
             categoryList.setId(UUID.fromString(category.getUuid()));
+            categoryList.setItemList(getItemListResp(category.getCategoryItems()));
             categoryListList.add(categoryList);
         }
         return categoryListList;
+    }
+
+    /**
+     * prepares response List of items in a category
+     * @param items
+     * @return
+     */
+    private List<ItemList> getItemListResp(List<ItemEntity> items) {
+        List<ItemList> itemList = new ArrayList<>();
+        for(ItemEntity item : items){
+            ItemList itemDetail = new ItemList();
+            itemDetail.setId(UUID.fromString(item.getUuid()));
+            itemDetail.setItemName(item.getItemName());
+            if(item.getType() == 0){
+                itemDetail.setItemType(ItemList.ItemTypeEnum.VEG);
+            }
+            else{
+                itemDetail.setItemType(ItemList.ItemTypeEnum.NON_VEG);
+            }
+            itemDetail.setPrice(item.getPrice().intValue());
+            itemList.add(itemDetail);
+        }
+        return itemList;
     }
 
     /**
