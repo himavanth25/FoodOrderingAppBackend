@@ -3,6 +3,7 @@ package com.upgrad.FoodOrderingApp.service.entity;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -17,6 +18,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "address", schema = "public")
 public class AddressEntity implements Serializable {
+
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,6 +51,7 @@ public class AddressEntity implements Serializable {
 
     @Column(name = "ACTIVE")
     @NotNull
+
     private int active;
 
     public Integer getId() {
