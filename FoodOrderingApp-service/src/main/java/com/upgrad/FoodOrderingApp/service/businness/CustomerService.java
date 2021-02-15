@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
@@ -46,7 +47,7 @@ public class CustomerService {
             throw new SignUpRestrictedException("SGR-002", "Invalid email-id format!");
         }
 
-        if (!customerEntity.getPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[#@$%&*!^])(?=\\\\S+$).{8,20}$")) {
+        if (!customerEntity.getPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[#@$%&*!^]).{8,20}")) {
             throw new SignUpRestrictedException("SGR-004", "Weak password!");
         }
 
@@ -154,10 +155,19 @@ public class CustomerService {
 
         CustomerEntity customer=authTokenEntity.getUser();
 
+      //  if(!customer.getPassword().equals(cryptographyProvider.encrypt(oldPassword,customer.getSalt()))){
         if(!customer.getPassword().equals(oldPassword)){
             throw new UpdateCustomerException("UCR-004", "Incorrect old password!");
         }
-        if (!customer.getPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[#@$%&*!^]).{8,20}")) {
+//        String regex = "^(?=.*[0-9])"
+//                + "(?=.*[a-z])(?=.*[A-Z])"
+//                + "(?=.*[@#$%^&+=])"
+//                + "(?=\\S+$).{8,20}$";
+//
+//        // Compile the ReGex
+//        Pattern p = Pattern.compile(regex);
+//        Matcher m = p.matcher(password);
+        if (!newPassword.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[#@$%&*!^]).{8,20}")) {
             throw new UpdateCustomerException("UCR-001", "Weak password!");
         }
         customer.setPassword(newPassword);
